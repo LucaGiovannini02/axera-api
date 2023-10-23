@@ -7,13 +7,14 @@ using System.Data.SqlClient;
 
 namespace AxeraPJW.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/course")]
     [ApiController]
     public class CoursesController : ControllerBase
     {
         private readonly string StringConnection = "Server = localhost\\SQLEXPRESS; Database= Axera; Trusted_connection=true; ";
 
         [HttpGet]
+        
         public ActionResult<Courses> GetCourses()
         {
             List<Courses> courses = new List<Courses>();
@@ -146,6 +147,33 @@ namespace AxeraPJW.Controllers
 
         [HttpGet("{id}/meetings")]
 
-        public ActionResult
+        public ActionResult<CourseIJ>  Get(int id)
+        {
+            
+            SqlConnection mySqlConnection = null;
+
+            try
+            {
+                mySqlConnection = new SqlConnection(StringConnection);
+                SqlCommand mySqlCommand = new SqlCommand();
+                mySqlCommand.Parameters.Add("@id", SqlDbType.Int);
+                mySqlCommand.Parameters["@id"].Value = id;
+                mySqlCommand.Connection = mySqlConnection;
+                mySqlCommand.CommandText = "Select * From Courses Inner join Meeting ON Courses.id=Meeting.courses_id Where Courses.id=@id and Courses.deleted=0 and Meeting.deleted=0";
+                mySqlConnection.Open();
+                SqlDataReader mySqlDataReader = mySqlCommand.ExecuteReader();
+
+                while (mySqlDataReader.Read())
+                {
+
+
+                }
+            }
+            catch (Exception ex) { }
+
+            finally { mySqlConnection?.Close(); }
+
+            return Ok();
+        }
     }
 }
