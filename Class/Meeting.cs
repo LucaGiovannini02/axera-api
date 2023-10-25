@@ -3,7 +3,7 @@
     public class Meeting
     {
         public int id { get; set; }
-        public int title { get; set; }
+        public string title { get; set; }
         public DateTime date { get; set; }
         public int duration { get; set; }
         public string note { get; set; }

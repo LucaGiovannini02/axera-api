@@ -185,36 +185,40 @@ namespace AxeraPJW.Controllers
 
         [HttpPatch("{id}/verified")]
 
-        public ActionResult SetUserVerified(int id, bool user_verified) {
+        public ActionResult SetUserVerified(int id, [FromBody] bool user_verified)
+        {
 
             SqlConnection? mySqlConnection = null;
 
-            try {
+            try
+            {
                 mySqlConnection = new SqlConnection(StringConnection);
                 SqlCommand mySqlCommand = new SqlCommand();
                 mySqlConnection.Open();
                 mySqlCommand.Connection = mySqlConnection;
 
-                mySqlCommand.Parameters.Add("@user_verified", SqlDbType.Bit); 
+                mySqlCommand.Parameters.Add("@user_verified", SqlDbType.Bit);
                 mySqlCommand.Parameters.Add("@id", SqlDbType.Int);
                 mySqlCommand.Parameters["@id"].Value = id;
-                mySqlCommand.Parameters["@user_verified"].Value=user_verified;
+                mySqlCommand.Parameters["@user_verified"].Value = user_verified;
 
                 mySqlCommand.CommandText = "Update Users Set user_verified=@user_verified WHERE id=@id ";
                 mySqlCommand.ExecuteNonQuery();
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
             }
-            finally { 
+            finally
+            {
 
-                mySqlConnection?.Close(); 
-            }   
+                mySqlConnection?.Close();
+            }
             return Ok();
         }
 
         [HttpPatch("{id}/newsletter")]
 
-        public ActionResult SetUserNewsletter(int id, bool newsletter_allow)
+        public ActionResult SetUserNewsletter(int id, [FromBody] bool newsletter_allow)
         {
 
             SqlConnection? mySqlConnection = null;
@@ -246,7 +250,7 @@ namespace AxeraPJW.Controllers
 
         [HttpPatch("{id}/waiver")]
 
-        public ActionResult SetUserWaiver(int id, bool waiver_allow)
+        public ActionResult SetUserWaiver(int id, [FromBody] bool waiver_allow)
         {
 
             SqlConnection? mySqlConnection = null;
@@ -273,12 +277,12 @@ namespace AxeraPJW.Controllers
             {
                 mySqlConnection?.Close();
             }
-            return Ok(); 
+            return Ok();
         }
 
         [HttpPatch("{id}/privacy")]
 
-        public ActionResult SetUserPrivacy(int id, bool privacy_allow)
+        public ActionResult SetUserPrivacy(int id, [FromBody] bool privacy_allow)
         {
 
             SqlConnection? mySqlConnection = null;
@@ -309,7 +313,51 @@ namespace AxeraPJW.Controllers
         }
 
 
+        [HttpGet("{id}/reservations")]
 
+        public ActionResult<UserIJ> GetMe(int id)
+        {
+            List<UserIJ> usersij = new List<UserIJ>();
+            SqlConnection mySqlConnection = null;
 
+            try
+            {
+                mySqlConnection = new SqlConnection(StringConnection);
+                SqlCommand mySqlCommand = new SqlCommand();
+                mySqlCommand.Parameters.Add("@id", SqlDbType.Int);
+                mySqlCommand.Parameters["@id"].Value = id;
+                mySqlCommand.Connection = mySqlConnection;
+                mySqlCommand.CommandText = "Select * From Users Inner join Reservations ON Users.id = Reservations.id_user Where Users.id = @id and Users.deleted = 0 and Reservations.deleted = 0";
+                mySqlConnection.Open();
+                SqlDataReader mySqlDataReader = mySqlCommand.ExecuteReader();
+
+                while(mySqlDataReader.Read()) { 
+
+                    UserIJ myUsers= new UserIJ();
+                    myUsers.id = mySqlDataReader.GetInt32(0);
+                    myUsers.fullname = mySqlDataReader.GetString(1);
+                    myUsers.age = mySqlDataReader.GetInt32(2);
+                    myUsers.parent = mySqlDataReader.IsDBNull(3) ? null : mySqlDataReader.GetString(3);
+                    myUsers.mail = mySqlDataReader.GetString(4);
+                    myUsers.user_verified = mySqlDataReader.GetBoolean(5);
+                    myUsers.newsletter_allow = mySqlDataReader.GetBoolean(6);
+                    myUsers.allergies = mySqlDataReader.IsDBNull(7) ? null : mySqlDataReader.GetString(7);
+                    myUsers.waiver_allow = mySqlDataReader.GetBoolean(8);
+                    myUsers.privacy_allow = mySqlDataReader.GetBoolean(9);
+                    myUsers.phone_number = mySqlDataReader.GetString(10);
+                    myUsers.idReservation= mySqlDataReader.GetInt32(12);    
+                    myUsers.note= mySqlDataReader.IsDBNull(15) ? null : mySqlDataReader.GetString(15);
+                    myUsers.payment_verified= mySqlDataReader.GetBoolean(16);
+                    myUsers.retire_allow= mySqlDataReader.GetBoolean(17); 
+
+                    usersij.Add(myUsers);
+
+                }
+
+            }
+            catch (Exception ex) { }
+            finally { mySqlConnection?.Close(); }
+            return Ok(usersij);
+        }
     }
 }

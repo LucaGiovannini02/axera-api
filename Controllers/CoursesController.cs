@@ -149,7 +149,7 @@ namespace AxeraPJW.Controllers
 
         public ActionResult<CourseIJ>  Get(int id)
         {
-            
+            List<CourseIJ> coursesij = new List<CourseIJ>();    
             SqlConnection mySqlConnection = null;
 
             try
@@ -165,15 +165,25 @@ namespace AxeraPJW.Controllers
 
                 while (mySqlDataReader.Read())
                 {
+                    CourseIJ myCourses = new CourseIJ();
+                    myCourses.id = mySqlDataReader.GetInt32(0);
+                    myCourses.name = mySqlDataReader.GetString(1);
+                    myCourses.description = mySqlDataReader.GetString(2);
+                    myCourses.idMeeting = mySqlDataReader.GetInt32(4);
+                    myCourses.date= mySqlDataReader.GetDateTime(6);
+                    myCourses.duration = mySqlDataReader.GetInt32(7);
+                    myCourses.note= mySqlDataReader.IsDBNull(8) ? null : mySqlDataReader.GetString(8);
+                    myCourses.max_users = mySqlDataReader.GetInt32(9);
+                    myCourses.min_users = mySqlDataReader.GetInt32(10);
 
-
+                    coursesij.Add(myCourses);
                 }
             }
             catch (Exception ex) { }
 
             finally { mySqlConnection?.Close(); }
 
-            return Ok();
+            return Ok(coursesij);
         }
     }
 }
